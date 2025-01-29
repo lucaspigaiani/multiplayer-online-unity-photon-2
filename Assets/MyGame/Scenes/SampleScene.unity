@@ -1402,6 +1402,7 @@ MonoBehaviour:
   loginPanel: {fileID: 429443303}
   matchPanel: {fileID: 521532505}
   playerNameInput: {fileID: 1104834651}
+  player: {fileID: 3582935724902509576, guid: fb16ef9dc8be4724cbd69798ec596d27, type: 3}
   roomNameInputField: {fileID: 1571152431}
 --- !u!4 &828965921
 Transform:

@@ -15,6 +15,7 @@ public class NetworkController : MonoBehaviourPunCallbacks
 
     [SerializeField] private TMP_InputField playerNameInput;
     private string tempPlayerName = "Player";
+    [SerializeField] private GameObject player;
 
     [Header("Room")]
     [SerializeField] private TMP_InputField roomNameInputField;
@@ -25,11 +26,11 @@ public class NetworkController : MonoBehaviourPunCallbacks
     {
         // PhotonNetwork.ConnectUsingSettings();
         //tempPlayerName = "Player" + Random.Range(1, 1000);
-       // playerNameInput.text = tempPlayerName;
-
+        // playerNameInput.text = tempPlayerName;
+        ChangePanelsStates(true, false);
     }
 
-    public void Login() 
+    public void Login()
     {
         if (playerNameInput.text != "")
         {
@@ -41,8 +42,13 @@ public class NetworkController : MonoBehaviourPunCallbacks
             PhotonNetwork.NickName = tempPlayerName;
         }
         PhotonNetwork.ConnectUsingSettings();
-        loginPanel.SetActive(false);
-        matchPanel.SetActive(true);
+        ChangePanelsStates(false, true);
+    }
+
+    private void ChangePanelsStates(bool login, bool match)
+    {
+        loginPanel.SetActive(login);
+        matchPanel.SetActive(match);
     }
 
     public void QuickFindMatch() 
@@ -88,6 +94,9 @@ public class NetworkController : MonoBehaviourPunCallbacks
         Debug.Log("Current room: " + PhotonNetwork.CurrentRoom.Name);
         Debug.Log("Current player in room: " + PhotonNetwork.CurrentRoom.PlayerCount);
 
+        ChangePanelsStates(false, false);
+       // Instantiate(player);
+        PhotonNetwork.Instantiate(player.name, player.transform.position, player.transform.rotation);
     }
 
     public override void OnDisconnected(DisconnectCause cause)
