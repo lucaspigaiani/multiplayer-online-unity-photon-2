@@ -6,35 +6,9 @@ using Photon.Realtime;
 
 public class NetworkController : MonoBehaviourPunCallbacks
 {
-    bool isConnected = false;
-
-    // Start is called before the first frame update
     void Start()
     {
-        //PhotonNetwork.ConnectUsingSettings();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        if (isConnected) 
-        {
-            if (Input.GetKeyDown(KeyCode.Q) )
-            {
-                PhotonNetwork.Disconnect();
-            }
-        }
-        if (!isConnected)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                PhotonNetwork.ConnectUsingSettings();
-            }
-            if (Input.GetKeyDown(KeyCode.E))
-            {
-                PhotonNetwork.ConnectToRegion("eu");
-            }
-        }
+        PhotonNetwork.ConnectUsingSettings();
     }
 
     public override void OnConnected()
@@ -46,13 +20,28 @@ public class NetworkController : MonoBehaviourPunCallbacks
     {
         Debug.Log("OnConnectedToMaster");
         Debug.Log("Server: " + PhotonNetwork.CloudRegion + " - Ping: " + PhotonNetwork.GetPing());
-        isConnected = true;
+        PhotonNetwork.JoinLobby();
+    }
+
+    public override void OnJoinedLobby()
+    {
+        Debug.Log("OnJoinedLobby");
+        PhotonNetwork.JoinRandomRoom();
+    }
+
+    public override void OnJoinRandomFailed(short returnCode, string message)
+    {
+        string roomTemp = "Room" + Random.Range(100, 10000);
+        PhotonNetwork.CreateRoom(roomTemp);
+    }
+
+    public override void OnJoinedRoom()
+    {
+        Debug.Log("OnJoinedRoom");
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("OnDisconnected cause: " + cause);
-        isConnected = false;
-
     }
 }
