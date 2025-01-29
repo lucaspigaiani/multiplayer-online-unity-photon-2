@@ -3,14 +3,61 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using TMPro;
 
 public class NetworkController : MonoBehaviourPunCallbacks
 {
+    [Header("GameObjects")]
+    [SerializeField] private GameObject loginPanel;
+    [SerializeField] private GameObject matchPanel;
+
+    [Header("Player")]
+
+    [SerializeField] private TMP_InputField playerNameInput;
+    private string tempPlayerName = "Player";
+
+    [Header("Room")]
+    [SerializeField] private TMP_InputField roomNameInputField;
+
+
+
     void Start()
     {
-        PhotonNetwork.ConnectUsingSettings();
+        // PhotonNetwork.ConnectUsingSettings();
+        //tempPlayerName = "Player" + Random.Range(1, 1000);
+       // playerNameInput.text = tempPlayerName;
+
     }
 
+    public void Login() 
+    {
+        if (playerNameInput.text != "")
+        {
+            PhotonNetwork.NickName = playerNameInput.text;
+        }
+        else
+        {
+            tempPlayerName = "Player" + Random.Range(1, 1000);
+            PhotonNetwork.NickName = tempPlayerName;
+        }
+        PhotonNetwork.ConnectUsingSettings();
+        loginPanel.SetActive(false);
+        matchPanel.SetActive(true);
+    }
+
+    public void QuickFindMatch() 
+    {
+        PhotonNetwork.JoinLobby();
+    }
+
+    public void CreateRoom() 
+    {
+        string tempRoomName = roomNameInputField.text;
+        RoomOptions roomOptions = new RoomOptions() { MaxPlayers = 6 };
+        PhotonNetwork.JoinOrCreateRoom(tempRoomName, roomOptions, TypedLobby.Default);
+    }
+
+    #region PunCallbacks
     public override void OnConnected()
     {
         Debug.Log("OnConnected");
@@ -20,7 +67,7 @@ public class NetworkController : MonoBehaviourPunCallbacks
     {
         Debug.Log("OnConnectedToMaster");
         Debug.Log("Server: " + PhotonNetwork.CloudRegion + " - Ping: " + PhotonNetwork.GetPing());
-        PhotonNetwork.JoinLobby();
+       // PhotonNetwork.JoinLobby();
     }
 
     public override void OnJoinedLobby()
@@ -37,11 +84,15 @@ public class NetworkController : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
-        Debug.Log("OnJoinedRoom");
+        Debug.Log("OnJoinedRoom" );
+        Debug.Log("Current room: " + PhotonNetwork.CurrentRoom.Name);
+        Debug.Log("Current player in room: " + PhotonNetwork.CurrentRoom.PlayerCount);
+
     }
 
     public override void OnDisconnected(DisconnectCause cause)
     {
         Debug.Log("OnDisconnected cause: " + cause);
     }
+    #endregion
 }
