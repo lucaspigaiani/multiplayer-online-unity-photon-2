@@ -3,6 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.UI;
+using Unity.VisualScripting;
+using Photon.Realtime;
+
+using Hashtable = ExitGames.Client.Photon.Hashtable;
+using Photon.Pun.UtilityScripts;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -72,16 +78,56 @@ public class PlayerController : MonoBehaviour
         Instantiate(bullet, spawnPoint.transform.position, spawnPoint.rotation);
     }
 
-    public void TakeDamage(float value) 
+    public void TakeDamage(float value, Player player) 
     {
-        photonView.RPC(nameof(NetworkTakeDamage), RpcTarget.AllBuffered, value);
+        photonView.RPC(nameof(NetworkTakeDamage), RpcTarget.AllBuffered, value, player);
     }
 
     [PunRPC]
-    private void NetworkTakeDamage(float value) 
+    private void NetworkTakeDamage(float value, Player player) 
     {
         HealthManager(value);
+
+
+        player.AddScore(10);
+
+        player.CustomProperties.TryGetValue("score", out object tempScorePlayer);
+
+        int sum = (int)tempScorePlayer;
+        sum += 10;
+
+        Hashtable playerTempHash = new()
+        {
+            { "score", sum }
+        };
+
+        player.SetCustomProperties(playerTempHash);
+
+
+        if (currentHealth <= 0 && photonView.IsMine)
+        {
+            photonView.RPC(nameof(GameOver), RpcTarget.MasterClient);
+        }
     }
+
+    [PunRPC]
+    private void GameOver() 
+    {
+        if (photonView.Owner.IsMasterClient) 
+        {
+            Debug.Log("GameOver");
+        }
+
+        foreach (var item in PhotonNetwork.PlayerList)
+        {
+            item.CustomProperties.TryGetValue("score", out object tempScorePlayer);
+
+            Debug.Log("player name: " + item.NickName + " | Score: " +  tempScorePlayer.ToString() + " | Photon score: " + item.GetScore());
+        }
+
+    }
+
+
 
     private void PlayerMove() 
     {

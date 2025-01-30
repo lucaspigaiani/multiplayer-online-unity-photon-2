@@ -48,7 +48,7 @@ public class BulletController : MonoBehaviour
             {
                 Debug.Log("PlayerID: " + photonView.Owner.ActorNumber + " PlayerName: " + photonView.Owner.NickName);
                 PlayerController playerController = collision.GetComponent<PlayerController>();
-                playerController.TakeDamage(-bulletDamage);
+                playerController.TakeDamage(-bulletDamage, photonView.Owner);
 
                 this.GetComponent<PhotonView>().RPC(nameof(DestroyBullet), RpcTarget.AllBufferedViaServer);
             }
