@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
 public class BulletController : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class BulletController : MonoBehaviour
 
     [SerializeField] private float bulletLifeTime;
     private float bulletTimeCount;
+
+    [SerializeField] private float bulletDamage = 10;
 
     // Start is called before the first frame update
     void Start()
@@ -28,5 +31,27 @@ public class BulletController : MonoBehaviour
         }
 
         bulletTimeCount += Time.deltaTime;
+    }
+
+    [PunRPC]
+    private void DestroyBullet() 
+    {
+        Destroy(this.gameObject);
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Player")) 
+        {
+            PhotonView photonView = collision.GetComponent<PhotonView>();
+            if (photonView.IsMine)
+            {
+                Debug.Log("PlayerID: " + photonView.Owner.ActorNumber + " PlayerName: " + photonView.Owner.NickName);
+                PlayerController playerController = collision.GetComponent<PlayerController>();
+                playerController.TakeDamage(-bulletDamage);
+
+                this.GetComponent<PhotonView>().RPC(nameof(DestroyBullet), RpcTarget.AllBufferedViaServer);
+            }
+        }
     }
 }

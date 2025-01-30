@@ -55,13 +55,32 @@ public class PlayerController : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             Debug.Log("Left Shoot");
-            Instantiate(bullet, spawnPoint.transform.position, spawnPoint.rotation);
+            // Instantiate(bullet, spawnPoint.transform.position, spawnPoint.rotation);
+            //photonView.RPC(nameof(NetworkShoot), RpcTarget.All);
+            PhotonNetwork.Instantiate(bullet.name, spawnPoint.transform.position, spawnPoint.rotation);
         }
-        if (Input.GetMouseButtonDown(1))
+        /*if (Input.GetMouseButtonDown(1))
         {
             Debug.Log("Right Shoot");
             PhotonNetwork.Instantiate(bulletPhoton.name, spawnPoint.transform.position, spawnPoint.rotation);
-        }
+        }*/
+    }
+
+    [PunRPC]
+    private void NetworkShoot() 
+    {
+        Instantiate(bullet, spawnPoint.transform.position, spawnPoint.rotation);
+    }
+
+    public void TakeDamage(float value) 
+    {
+        photonView.RPC(nameof(NetworkTakeDamage), RpcTarget.AllBuffered, value);
+    }
+
+    [PunRPC]
+    private void NetworkTakeDamage(float value) 
+    {
+        HealthManager(value);
     }
 
     private void PlayerMove() 
